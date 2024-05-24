@@ -38,14 +38,14 @@ class TestCalculator(unittest.TestCase):
     #     result = self.visitor.visit(tree)
     #     self.assertEqual(result, 20)
         
-    # def test_nested_expressions(self):
-    #     input = "(let x = 5; let y = 10; (x + 2) > y) ? ((x == 3) ? x * 2 : x) : y * 2;"
-    #     lexer = CalcLexer(InputStream(input))
-    #     stream = CommonTokenStream(lexer)
-    #     parser = CalcParser(stream)
-    #     tree = parser.prog()
-    #     result = self.visitor.visit(tree)
-    #     self.assertEqual(result, 10)
+    def test_nested_expressions(self):
+        input = "(let x = 5; let y = 10; (x + 2) > y) ? ((x == 3) ? x * 2 : x) : y * 2;"
+        lexer = CalcLexer(InputStream(input))
+        stream = CommonTokenStream(lexer)
+        parser = CalcParser(stream)
+        tree = parser.prog()
+        result = self.visitor.visit(tree)
+        self.assertEqual(result, 10)
 
         
     def test_return_value(self):
@@ -58,7 +58,7 @@ class TestCalculator(unittest.TestCase):
         self.assertEqual(result, 50)
     
     def test_duplicate_variable_declaration(self):
-        input = "x = 10; x = 5;"
+        input = "let x = 10; let x = 5;"
         lexer = CalcLexer(InputStream(input))
         stream = CommonTokenStream(lexer)
         parser = CalcParser(stream)
@@ -66,8 +66,8 @@ class TestCalculator(unittest.TestCase):
             tree = parser.prog()
             self.visitor.visit(tree)
         exception_message = str(context.exception)
-        print("Mensagem de exceção:", exception_message)  # Adição da impressão da mensagem de exceção
         self.assertTrue('Variable \'x\' already declared' in exception_message)
+
 
     def test_undefined_variable(self):
         input = "x + 5;"
