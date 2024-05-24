@@ -11,9 +11,12 @@ class EvalVisitor(CalcVisitor):
         var_name = ctx.ID().getText()
         if var_name in self.memory:
             raise Exception(f"Variable '{var_name}' already declared")
-        value = self.visit(ctx.expr())
-        self.memory[var_name] = value
-        return value
+        else:
+            self.memory[var_name] = None  # Adicione a variável à memória antes de visitar a expressão
+            value = self.visit(ctx.expr())
+            self.memory[var_name] = value
+            return value
+
 
     def visitExpression(self, ctx):
         return self.visit(ctx.expr())
@@ -23,7 +26,7 @@ class EvalVisitor(CalcVisitor):
         right = self.visit(ctx.expr(1))
         if ctx.getChild(1).getText() == '*':
             return left * right
-        else:  # '/'
+        else:
             return left / right
 
     def visitAddSub(self, ctx):
@@ -31,7 +34,7 @@ class EvalVisitor(CalcVisitor):
         right = self.visit(ctx.expr(1))
         if ctx.getChild(1).getText() == '+':
             return left + right
-        else:  # '-'
+        else:
             return left - right
 
     def visitParens(self, ctx):

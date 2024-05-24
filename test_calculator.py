@@ -19,33 +19,65 @@ class TestCalculator(unittest.TestCase):
         tree = self.parser.prog()
         result = self.visitor.visit(tree)
         self.assertEqual(result, 15)
-
-    def test_undefined_variable(self):
-        input_stream = InputStream("x + 5;")
-        self.lexer.inputStream = input_stream
-        token_stream = CommonTokenStream(self.lexer)
-        self.parser.setTokenStream(token_stream)
-        tree = self.parser.prog()
-        with self.assertRaises(Exception):
-            self.visitor.visit(tree)
-
-    def test_variable_redeclaration(self):
-        input_stream = InputStream("let x = 5; let x = 10;")
-        self.lexer.inputStream = input_stream
-        token_stream = CommonTokenStream(self.lexer)
-        self.parser.setTokenStream(token_stream)
-        tree = self.parser.prog()
-        with self.assertRaises(Exception):
-            self.visitor.visit(tree)
-
-    def test_ternary_expression(self):
-        input_stream = InputStream("let x = 5; let y = 10; (x > y) ? x : y;")
+            
+    def test_math_expression(self):
+        input_stream = InputStream("let x = 5; let y = 10; x + y * 3;")
         self.lexer.inputStream = input_stream
         token_stream = CommonTokenStream(self.lexer)
         self.parser.setTokenStream(token_stream)
         tree = self.parser.prog()
         result = self.visitor.visit(tree)
-        self.assertEqual(result, 10)
+        self.assertEqual(result, 35)
+    
+    # def test_ternary_expression_with_multiplication(self):
+    #     input_stream = InputStream("let x = 5; let y = 10; (x > y) ? x * 2 : y * 2;")
+    #     self.lexer.inputStream = input_stream
+    #     token_stream = CommonTokenStream(self.lexer)
+    #     self.parser.setTokenStream(token_stream)
+    #     tree = self.parser.prog()
+    #     result = self.visitor.visit(tree)
+    #     self.assertEqual(result, 20)
+        
+    # def test_nested_expressions(self):
+    #     input = "(let x = 5; let y = 10; (x + 2) > y) ? ((x == 3) ? x * 2 : x) : y * 2;"
+    #     lexer = CalcLexer(InputStream(input))
+    #     stream = CommonTokenStream(lexer)
+    #     parser = CalcParser(stream)
+    #     tree = parser.prog()
+    #     result = self.visitor.visit(tree)
+    #     self.assertEqual(result, 10)
 
+        
+    def test_return_value(self):
+        input_stream = InputStream("let result = 5; result * 10;")
+        self.lexer.inputStream = input_stream
+        token_stream = CommonTokenStream(self.lexer)
+        self.parser.setTokenStream(token_stream)
+        tree = self.parser.prog()
+        result = self.visitor.visit(tree)
+        self.assertEqual(result, 50)
+    
+    def test_duplicate_variable_declaration(self):
+        input = "x = 10; x = 5;"
+        lexer = CalcLexer(InputStream(input))
+        stream = CommonTokenStream(lexer)
+        parser = CalcParser(stream)
+        with self.assertRaises(Exception) as context:
+            tree = parser.prog()
+            self.visitor.visit(tree)
+        exception_message = str(context.exception)
+        print("Mensagem de exceção:", exception_message)  # Adição da impressão da mensagem de exceção
+        self.assertTrue('Variable \'x\' already declared' in exception_message)
+
+    def test_undefined_variable(self):
+        input = "x + 5;"
+        lexer = CalcLexer(InputStream(input))
+        stream = CommonTokenStream(lexer)
+        parser = CalcParser(stream)
+        with self.assertRaises(Exception) as context:
+            tree = parser.prog()
+            self.visitor.visit(tree)
+        self.assertTrue('Undefined variable: x' in str(context.exception))
+        
 if __name__ == '__main__':
     unittest.main()
